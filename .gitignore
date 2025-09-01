@@ -1,0 +1,3 @@
+config/envs/dev.env
+.vscode
+.DS_Store
