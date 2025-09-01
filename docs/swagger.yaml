@@ -1,0 +1,122 @@
+basePath: /api
+definitions:
+  pkg.Summary:
+    properties:
+      archetype:
+        type: string
+      top_artists:
+        items:
+          type: string
+        type: array
+      top_genres:
+        items:
+          type: string
+        type: array
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:50000
+info:
+  contact: {}
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Spotify API
+  version: 0.0.1
+paths:
+  /analyze:
+    get:
+      consumes:
+      - application/json
+      description: Uses the provided Bearer token to fetch the user’s top tracks and
+        audio features, then returns Archetype and top genres.
+      parameters:
+      - description: Bearer token (add 'Bearer ' prefix to token)
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Analysis metrics
+          schema:
+            $ref: '#/definitions/pkg.Summary'
+        "401":
+          description: Missing or invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Analysis error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Analyze user music data
+      tags:
+      - analyze
+  /callback/spotify:
+    get:
+      consumes:
+      - application/json
+      description: Verifies state, exchanges code for an access token, fetches the
+        current user and returns their email and token info.
+      parameters:
+      - description: Original state value for CSRF protection
+        in: query
+        name: state
+        required: true
+        type: string
+      - description: Authorization code returned by Spotify
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the user’s email, the access token, and its TTL in
+            seconds
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid or missing state or code
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Token exchange or user-info fetch failure
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Spotify OAuth2 callback
+      tags:
+      - auth
+  /login/spotify:
+    get:
+      description: Redirects the user to the Spotify authorization page.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Redirect to Spotify OAuth
+      summary: Initiate Spotify login
+      tags:
+      - auth
+schemes:
+- http
+swagger: "2.0"
